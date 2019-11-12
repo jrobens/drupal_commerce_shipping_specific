@@ -1,0 +1,87 @@
+<?php
+
+/*
+ * Display a notice if people have not set the 'read manual' value in the profile.
+ *
+ * jrobens@interlated.com.au 201904
+ *
+ * $view = entity_view('affiliate_campaign', array($campaign->campaign_id => $campaign));
+$output = '<div>' . t('Referral link') . '</div>';
+$output .= '<div>'. t('Front page') . ': http://' . $_SERVER['HTTP_HOST'] . '/ref/' . $account->uid . '/' . $campaign->campaign_id . '</div>';
+$output .= '<div>'. t('Custom page') . ': http://' . $_SERVER['HTTP_HOST'] . '/custom_page?a=' . $account->uid . '&c=' . $campaign->campaign_id . '</div>';
+$output .= drupal_render($view);
+*/
+
+
+/**
+ * Implements hook_help().
+ */
+function colongshipping_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#' . ColongShipping::MODULE_NAME:
+      $output = '<p>' . t('Enforce the reading of the document setting.') . '</p>';
+      return $output;
+  }
+  return "";
+}
+
+
+/*
+ * If the dimensions on the book are set (is shippable) then the Australia post api is used
+ * to calculate the domestic postage.
+ *
+ * $8.95 for 1 'rescuing wilderness' dimensions;
+ * $12.20 for 2.
+ * plus $12.95 Australia post calculated for Blue Mountains flora which is handled by Jan.
+ *
+ * If Jan is sending
+ */
+
+
+/**
+ *
+ * @param $details_form
+ * @param $details_values
+ * @param $shopping_line_item - the shipping line item.
+ */
+function colongshipping_commerce_shipping_line_item_new_alter($shipping_line_item) {
+  $colongShipping = new ColongShipping($shipping_line_item);
+  if (!$colongShipping->checkValidity()) {return;}
+
+  $colongShipping->checkOrder();
+  // Now recalculate any remaining line items with commerce post.
+}
+
+
+
+//function _colongshipping_check
+
+
+// Different hook.
+function colongshipping_commerce_shipping_calculate_rate($line_item) {
+  return;
+  if ($line_item->data['shipping_service']['name'] != 'regular_parcel_standard') {
+    return;
+  }
+  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+
+  // Build a price array for the express delivery fee.
+  $express_price = [
+    'amount' => 1500,
+    'currency_code' => $line_item_wrapper->commerce_unit_price->currency_code->value(),
+    'data' => [],
+  ];
+
+  // Add the express upcharge to the line item unit price.
+  $line_item_wrapper->commerce_unit_price->amount = $line_item_wrapper->commerce_unit_price->amount->value() + 1500;
+
+  // Add the express delivery fee component to the unit price.
+  $line_item_wrapper->commerce_unit_price->data = commerce_price_component_add(
+    $line_item_wrapper->commerce_unit_price->value(),
+    'example_shipping_service_express',
+    $express_price,
+    TRUE,
+    FALSE
+  );
+}
+

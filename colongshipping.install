@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ *   Install file for yogahive booking module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function colongshipping_install() {
+
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function colongshipping_uninstall() {
+
+}
+
+// colongshipping_enable()
+// colongshipping_disable()
+
+/**
+ * Implements hook_schema().
+ *
+ * drush pm-disable -y colongshipping
+ * drush en -y colongshipping
+ */
+function colongshipping_schema() {
+}
+
+
+/**
+ * Implements hook_requirements().
+ */
+function colongshipping_requirements($phase) {
+
+}
+

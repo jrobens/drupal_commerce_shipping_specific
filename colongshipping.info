@@ -1,0 +1,6 @@
+name = ColongShipping
+description = Colong Shipping calcultions
+core = 7.x
+package = Interlated
+
+files[] = includes/ColongShipping.php
